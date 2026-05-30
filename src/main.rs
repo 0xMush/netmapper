@@ -1,8 +1,7 @@
 use tokio::net::TcpStream;
 use std::env;
-
-
-
+use std::time::Duration;
+use tokio::io::AsyncReadExt;
 
 #[tokio::main]
 async fn main() {
@@ -62,7 +61,27 @@ async fn port_scanner(args: &[String]){
 
                 let handle = tokio::spawn(async move {
                     match TcpStream::connect(&addr).await {
-                        Ok(_) => println!("{} is OPEN", check_port),
+                        Ok(mut stream) => {
+                            let mut buffer = [0; 256];
+                            let read_result = tokio::time::timeout(Duration::from_secs(2), stream.read(&mut buffer)).await;
+                            
+                            // Read results for banner and errors
+                            match read_result{
+                                Ok(Ok(n)) => {
+                                    let banner = String::from_utf8_lossy(&buffer[0..n]);
+                                    println!("Port is open {} {}", check_port, banner);
+                                }
+                                Ok(Err(e)) => {
+                                    println!("Port is open {} Read error: {}", check_port, e);
+                                }
+
+                                Err(_) => {
+                                    println!("Port is Open {}", check_port);
+                                }
+                            }
+
+                            
+                        }
                         Err(_) => println!("{} is CLOSED", check_port),
                     }
 
@@ -77,7 +96,28 @@ async fn port_scanner(args: &[String]){
         } else {
             let addr = format!("{}:{}", target_ip, ports_arg);
             match TcpStream::connect(&addr).await{
-                Ok(_) => println!("{} Is open", ports_arg),
+                Ok(mut stream) => {
+                    let mut buffer = [0; 256];
+                    let read_result = tokio::time::timeout(Duration::from_secs(2), stream.read(&mut buffer)).await;
+
+                    match read_result{
+                        Ok(Ok(n)) => {
+                            let banner = String::from_utf8_lossy(&buffer[0..n]);
+                            println!("Port is Open {} {}", ports_arg, banner);
+                        }
+                        Ok(Err(e)) => {
+                            println!("Port is Open {} Read Error: {}", ports_arg, e);
+                        }
+                        Err(_) => {
+                            println!("Port is Open {}", ports_arg);
+                        }
+                    }
+
+
+
+
+
+                } 
                 Err(_) => println!("{} Is Closed", ports_arg)
             }
         }
@@ -92,7 +132,23 @@ async fn port_scanner(args: &[String]){
             
             let handle = tokio::spawn(async move {
                 match TcpStream::connect(&addr).await{
-                    Ok(_) => println!("{} Is open", uport),
+                    Ok(mut stream) => {
+                        let mut buffer = [0; 256];
+                        let read_result = tokio::time::timeout(Duration::from_secs(2), stream.read(&mut buffer)).await;
+
+                        match read_result {
+                            Ok(Ok(n)) => {
+                                let banner = String::from_utf8_lossy(&buffer[0..n]);
+                                println!("Port is Open {} {}", uport, banner);
+                            }
+                            Ok(Err(e)) => {
+                                println!("Porn is Open {} Read Error: {}", uport, e);
+                            }
+                            Err(_) => {
+                                println!("Port is Open {}", uport);
+                            }
+                        } 
+                    }
                     Err(_) => println!("{} Is Clossed", uport)
                 }
                 
