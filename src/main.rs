@@ -6,9 +6,25 @@ use tokio::io::AsyncReadExt;
 #[tokio::main]
 async fn main() {
 
+    let topbanner = r"
+        ____   _____/  |_  _____ _____  ______ ______   ___________ 
+        /    \_/ __ \   __\/     \\__  \ \____ \\____ \_/ __ \_  __ \
+        |   |  \  ___/|  | |  Y Y  \/ __ \|  |_> >  |_> >  ___/|  | \/
+        |___|  /\___  >__| |__|_|  (____  /   __/|   __/ \___  >__|   
+            \/     \/           \/     \/|__|   |__|        \/        
+            
+            
+            ";
     let args: Vec<String> = env::args().collect();
+    
+
     if args.len() < 3 {
-        println!("Usage: {} <ip> <start port>", args[0]);
+        println!("{}", topbanner);
+        println!("Usage: {} <ip> <ports>", args[0]);
+        println!("Example Range: {} <example.com> -p 1-1000", args[0]);
+        println!("Example Single: {} <example.com> -p 22", args[0]);
+        println!("Example Multiple: {} <example.com> -p 20 40 80 22", args[0]);
+
         return;
     }
 
@@ -18,17 +34,24 @@ async fn main() {
 }
 
 async fn port_scanner(args: &[String]){
+
+    if args.contains(&"-h".to_string()) {
+    println!("Usage: {} <ip> <ports>", args[0]);
+    println!("Example Range: {} <example.com> -p 1-1000", args[0]);
+    println!("Example Single: {} <example.com> -p 22", args[0]);
+    println!("Example Multiple: {} <example.com> -p 20 40 80 22", args[0]);
+    return;
+    }
     // 2. Access the inputs by index
     let target_ip = &args[1].clone();
-    // let target_port = &args[2];
 
     // check for ports range -p
             
     let mut ports = Vec::new();
 
+
     for (i, arg) in args.iter().enumerate() { {
-        println!("{}", arg);
-        if arg == "-p"{
+            if arg == "-p"{
             let mut j = i + 1;
 
             while j < args.len() {
@@ -41,9 +64,11 @@ async fn port_scanner(args: &[String]){
             }
 
             //my code
-        }
+            }
+
         }
     }
+
 
     if ports.len() == 1{
         let ports_arg = &ports[0];
@@ -82,7 +107,7 @@ async fn port_scanner(args: &[String]){
 
                             
                         }
-                        Err(_) => println!("{} is CLOSED", check_port),
+                        Err(_) => (),
                     }
 
                 });
@@ -118,7 +143,7 @@ async fn port_scanner(args: &[String]){
 
 
                 } 
-                Err(_) => println!("{} Is Closed", ports_arg)
+                Err(_) => (),
             }
         }
     }
@@ -142,14 +167,14 @@ async fn port_scanner(args: &[String]){
                                 println!("Port is Open {} {}", uport, banner);
                             }
                             Ok(Err(e)) => {
-                                println!("Porn is Open {} Read Error: {}", uport, e);
+                                println!("Port is Open {} Read Error: {}", uport, e);
                             }
                             Err(_) => {
                                 println!("Port is Open {}", uport);
                             }
                         } 
                     }
-                    Err(_) => println!("{} Is Clossed", uport)
+                    Err(_) => (),
                 }
                 
             });
